@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHATBOT</title>
+  <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+    integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
+    crossorigin="anonymous" />
+</head>
+
+<body>
+  <!-- <h1>ICHAT</h1> -->
+  <div class="login-wrap">
+    <div class="login-html">
+      <input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">Sign In</label>
+      <input id="tab-2" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab">Sign Up</label>
+      <div class="login-form">
+        <div class="sign-in-htm">
+          <div class="group">
+            <label for="user" class="label">Username</label>
+            <input id="usernameSignin" type="text" class="input">
+          </div>
+          <div class="group">
+            <label for="pass" class="label">Password</label>
+            <input id="passwordSignin" type="password" class="input" data-type="password">
+          </div>
+          <div class="group">
+            <input id="check" type="checkbox" class="check" checked>
+            <label for="check"><span class="icon"></span> Keep me Signed in</label>
+          </div>
+          <div class="group">
+            <button onclick="login()" class="button">Login</button>
+          </div>
+          <div class="hr"></div>
+        </div>
+        <div class="sign-up-htm">
+          <div class="group">
+            <label for="user" class="label">Username</label>
+            <input id="usernameSignup" type="text" class="input">
+          </div>
+          <div class="group">
+            <label for="pass" class="label">Password</label>
+            <input id="passwordSignup" type="password" class="input" data-type="password">
+          </div>
+          <div class="group">
+            <button onclick="register()" class="button">Register</button>
+          </div>
+          <div class="hr"></div>
+          <div class="foot-lnk">
+            <label for="tab-1">Already Member?</a>
+          </div>
+        </div>
+      </div>
+      <div id="status" style="color: white" class="button"></div>
+    </div>
+
+  </div>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.28.0/moment.min.js"
+    integrity="sha512-Q1f3TS3vSt1jQ8AwP2OuenztnLU6LwxgyyYOG1jgMW/cbEMHps/3wjvnl1P3WTrF3chJUWEoxDUEjMxDV8pujg=="
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
