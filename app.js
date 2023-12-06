@@ -3,7 +3,22 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 4000;
 const axios = require("axios");
+const bcrypt = require("bcryptjs");
+
 const { getAnswer } = require("./getAnswer");
+
+const mongoose = require("mongoose");
+
+const MONGODB_URI = "mongodb://localhost:27017/socket"; // Thay thế bằng địa chỉ MongoDB của bạn
+mongoose.connect(MONGODB_URI);
+const db = mongoose.connection;
+
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
+db.once("open", () => {
+  console.log("Connected to MongoDB");
+});
+
+const User = require("./models/users");
 
 const server = app.listen(PORT, () =>
   console.log(`««««« server on ${PORT} »»»»»`)
@@ -32,12 +47,11 @@ function onConnected(socket) {
   });
 
   socket.on("message", async (data) => {
-    console.log("Message from client:", data);
-
+    socket.emit("wait", false);
     // Thực hiện yêu cầu HTTP bằng axios
     try {
       const response = await axios.post(
-        "https://c251-34-142-160-96.ngrok-free.app/query_description",
+        "https://af8c-35-247-58-8.ngrok-free.app/query_description",
         {
           query: data.message,
         },
@@ -50,64 +64,71 @@ function onConnected(socket) {
 
       if (response.status === 200) {
         const receivedQueryId = response.data.query_id;
-        console.log("Query ID answer:", receivedQueryId);
 
         // Call the additional API with the received queryId
         const responseData = await getAnswer(receivedQueryId);
         // Gửi kết quả từ API về cho client thông qua WebSocket
         socket.emit("http-response", responseData);
+        socket.emit("wait", true);
       }
     } catch (error) {
       console.error("Error making HTTP request:", error.message);
     }
   });
   // Xử lý đăng ký
-  let users = [];
-  socket.on("register", (data) => {
-    const { username, password, values } = data;
-    if (values && values.find((value) => value.username === username)) {
-      socket.emit("abc", {
+  socket.on("register", async (data) => {
+    const { username, password } = data;
+    console.log("««««« username »»»»»", username);
+    // Kiểm tra xem người dùng đã tồn tại chưa
+    const existingUser = await User.findOne({ username });
+
+    if (existingUser) {
+      socket.emit("register-status", {
         success: false,
         message: "Username already taken",
       });
-    }
-    // Kiểm tra nếu tên người dùng đã tồn tại
-    else {
-      // Lưu thông tin người dùng
+    } else {
+      // Tạo một người dùng mới và lưu vào cơ sở dữ liệu
+      const newUser = new User({ username, password });
+      await newUser.save();
 
-      users[username] = { username, password };
-
-      socket.emit("store-user-in-local-storage", { user: users[username] });
-
-      socket.emit("abc", {
+      socket.emit("register-status", {
         success: true,
         message: "Registration successful",
       });
-      console.log("Registration successful");
     }
   });
 
   // Xử lý đăng nhập
-  socket.on("login", (data) => {
-    const { username, password, values } = data;
-    console.log(values);
+  socket.on("login", async (data) => {
+    const { username, password } = data;
 
-    // Kiểm tra tên người dùng và mật khẩu
-    if (
-      values &&
-      values.find(
-        (value) => value.username === username && value.password === password
-      )
-    ) {
-      socket.emit("login-status", {
-        success: true,
-        user: username,
-        message: "Login successful",
-      });
+    // Tìm người dùng dựa trên tên đăng nhập
+    const existingUser = await User.findOne({ username });
+
+    if (existingUser) {
+      // So sánh mật khẩu đã nhập với mật khẩu trong cơ sở dữ liệu
+      const isPasswordMatch = await bcrypt.compare(
+        password,
+        existingUser.password
+      );
+
+      if (isPasswordMatch) {
+        socket.emit("login-status", {
+          success: true,
+          user: username,
+          message: "Login successful",
+        });
+      } else {
+        socket.emit("login-status", {
+          success: false,
+          message: "Invalid password or username",
+        });
+      }
     } else {
       socket.emit("login-status", {
         success: false,
-        message: "Invalid username or password",
+        message: "Invalid username or username",
       });
     }
   });

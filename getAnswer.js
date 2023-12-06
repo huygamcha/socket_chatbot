@@ -4,7 +4,7 @@ const axios = require("axios");
 async function getAnswer(query) {
   try {
     const response = await axios.get(
-      `https://c251-34-142-160-96.ngrok-free.app/query_result/${query}`,
+      `https://af8c-35-247-58-8.ngrok-free.app/query_result/${query}`,
       {
         withCredentials: true,
         headers: {
